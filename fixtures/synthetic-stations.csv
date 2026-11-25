@@ -1,0 +1,3 @@
+opis_station_id,station_name,original_address,city,state,latitude,longitude,source,match_status,confidence,address_type,evidence
+fixture-001,Synthetic Fuel One,100 Example Road,Fixture City,MO,38.0,-91.5,https://example.invalid/synthetic-fixture,verified,synthetic,street,Fictional fixture coordinate for testing only
+fixture-002,Synthetic Candidate Two,200 Example Road,Fixture City,MO,,,https://example.invalid/synthetic-fixture,unresolved,none,street,Fictional unresolved candidate

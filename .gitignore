@@ -1,0 +1,44 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Private data: ignore everything except open OSM snapshots
+/private-data/*
+!/private-data/open-osm/
+!/private-data/open-osm/**
+
+# Generated caches and coverage
+/coverage_data/
+/.geocode-cache/
+
+# Restricted and generated datasets
+/fuel-prices-for-be-assessment.csv
+/verified_stations.csv
+/pilot.csv
+/pilot_audit.csv
+/reviews.csv
+
+# Internal audit
+/TECHNICAL_AUDIT.md
+
+# Generated responses
+/response.json
+/route.geojson
+
+# Large raw geographic datasets
+*.osm.pbf
+
+# Ignore CSV datasets except synthetic fixtures
+*.csv
+!/fixtures/synthetic-prices.csv
+!/fixtures/synthetic-stations.csv
+
+# Django generated static files
+/staticfiles/

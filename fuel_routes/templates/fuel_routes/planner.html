@@ -1,0 +1,95 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Plan a route and see where to refuel along the way.">
+  <title>Fuel Route Planner | Spotter</title>
+  <link rel="stylesheet" href="{% static 'fuel_routes/vendor/leaflet/leaflet.css' %}">
+  <link rel="stylesheet" href="{% static 'fuel_routes/planner.css' %}">
+  <script defer src="{% static 'fuel_routes/vendor/leaflet/leaflet.js' %}"></script>
+  <script defer src="{% static 'fuel_routes/planner.js' %}"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="frame header-inner">
+      <a class="brand" href="{% url 'route-planner' %}" aria-label="Spotter home">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>spotter<span class="brand-period">.</span></span>
+      </a>
+      <span id="data-mode" class="mode-pill" data-mode="{% if synthetic_catalog %}synthetic{% else %}configured{% endif %}">{% if synthetic_catalog %}Synthetic demo{% else %}Authorized real data{% endif %}</span>
+    </div>
+  </header>
+
+  <main class="frame">
+    <div class="intro">
+      <h1>Fuel Route Planner</h1>
+      <p>Plan your drive, find fuel stops, and estimate what you'll spend.</p>
+    </div>
+
+    <div class="workspace">
+      <section class="card setup" aria-labelledby="setup-title">
+        <h2 id="setup-title">Plan your trip</h2>
+        <p class="muted setup-description">Enter a US street address or latitude, longitude.</p>
+        <form id="route-form" action="{% url 'fuel-route' %}" method="post" novalidate>
+          <div class="route-fields">
+            <div class="field">
+              <label for="start"><span class="waypoint start-point" aria-hidden="true"></span>Start</label>
+              <input id="start" name="start" type="text" required maxlength="250" spellcheck="false" placeholder="e.g. 36.154, -95.9928">
+            </div>
+            <div class="field">
+              <label for="finish"><span class="waypoint finish-point" aria-hidden="true"></span>Destination</label>
+              <input id="finish" name="finish" type="text" required maxlength="250" spellcheck="false" placeholder="e.g. 39.1031, -84.512">
+            </div>
+          </div>
+          <button id="calculate" class="calculate" type="submit"><span class="spinner" hidden></span><span id="calculate-label">Calculate Route</span><span class="arrow" aria-hidden="true">→</span></button>
+          <button id="load-demo" class="demo-button" type="button">Use demo coordinates</button>
+        </form>
+        <p id="route-error" class="error" role="alert" hidden></p>
+        <noscript><p class="error">Enable JavaScript to calculate and display a route.</p></noscript>
+
+        <div class="vehicle">
+          <h3>Vehicle assumptions</h3>
+          <dl class="vehicle-specs">
+            <div><dt>Range</dt><dd><span id="vehicle-range">{{ vehicle_range }}</span> <small>mi</small></dd></div>
+            <div><dt>Tank</dt><dd><span id="tank-gallons">{{ tank_gallons }}</span> <small>gal</small></dd></div>
+            <div><dt>Efficiency</dt><dd><span id="efficiency">{{ miles_per_gallon }}</span> <small>MPG</small></dd></div>
+          </dl>
+          <p class="muted">The vehicle starts with a full tank (<span id="initial-gallons">{{ initial_gallons }}</span> gal). The estimate covers fuel bought during the trip.</p>
+        </div>
+      </section>
+
+      <section class="card map-card" aria-labelledby="map-title">
+        <div class="map-header">
+          <div><h2 id="map-title">Route map</h2><p class="muted">Driving route and planned fuel stops</p></div>
+          <span id="map-status" class="map-status" role="status">Awaiting route</span>
+        </div>
+        <div id="route-map" aria-label="Interactive route map" data-outlines-url="{% static 'fuel_routes/geo/us-states.geojson' %}"></div>
+        <p id="map-error" class="map-notice" role="status" hidden></p>
+        <div class="map-footer">
+          <div class="map-legend"><span><i class="legend-line"></i>Route</span><span><i class="legend-stop"></i>Fuel stop</span></div>
+          <p id="mode-note">{% if synthetic_catalog %}Synthetic route for demonstration only. Never use for navigation.{% else %}Authorized station data. Detour mileage is estimated.{% endif %}</p>
+        </div>
+      </section>
+    </div>
+
+    <section class="summary" aria-labelledby="summary-title">
+      <h2 id="summary-title">Trip summary</h2>
+      <dl class="metrics" aria-live="polite">
+        <div class="card metric"><dt>Route distance</dt><dd><span id="route-miles">—</span> <small>mi</small></dd></div>
+        <div class="card metric"><dt>Estimated with detours</dt><dd><span id="total-miles">—</span> <small>mi</small></dd></div>
+        <div class="card metric"><dt>Fuel purchased</dt><dd><span id="fuel-purchased">—</span> <small>gal</small></dd></div>
+        <div class="card metric cost-metric"><dt>Estimated fuel cost</dt><dd id="fuel-cost">—</dd></div>
+      </dl>
+      <p class="muted estimate-note">Station detours are estimated. Actual road access and distances may differ.</p>
+    </section>
+
+    <section class="card stops" aria-labelledby="stops-title">
+      <h2 id="stops-title">Fuel stops</h2>
+      <p id="stops-empty" class="muted">Calculate a route to see your fuel plan.</p>
+      <ol id="stops-list" class="stops-list" hidden></ol>
+    </section>
+  </main>
+</body>
+</html>

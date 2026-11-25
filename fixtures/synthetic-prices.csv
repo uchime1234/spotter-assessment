@@ -1,0 +1,4 @@
+OPIS Truckstop ID,Truckstop Name,Address,City,State,Rack ID,Retail Price
+fixture-001,Synthetic Fuel One,100 Example Road,Fixture City,MO,0,2.90
+fixture-001,Synthetic Fuel One,100 Example Road,Fixture City,MO,0,3.10
+fixture-002,Synthetic Candidate Two,200 Example Road,Fixture City,MO,0,1.00

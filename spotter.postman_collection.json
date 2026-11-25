@@ -1,0 +1,172 @@
+{
+  "info": {
+    "name": "Spotter Fuel Routes",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Run commands from the project root using the project's Python environment. Start python -m scripts.demo_provider, then start python manage.py runserver 127.0.0.1:8000 in a separate terminal. On Windows use .venv\\Scripts\\python.exe in place of python if needed. Use the synthetic requests with the default settings and the authorized live requests only with the real-data settings documented in README.md."
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    }
+  ],
+  "item": [
+    {
+      "name": "Synthetic demo \u2014 fuel stop",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/v1/fuel-routes/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"start\": {\n    \"latitude\": 36.154,\n    \"longitude\": -95.9928\n  },\n  \"finish\": {\n    \"latitude\": 39.1031,\n    \"longitude\": -84.512\n  }\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Synthetic demo returns a fuel plan\", () => {",
+              "  pm.response.to.have.status(200);",
+              "  const plan = pm.response.json();",
+              "  pm.expect(plan.catalog_mode).to.eql(\"synthetic\");",
+              "  pm.expect(plan.geometry.type).to.eql(\"LineString\");",
+              "  pm.expect(plan.fuel_stops[0].gallons_purchased).to.eql(12);",
+              "  pm.expect(plan.estimated_fuel_purchases_usd).to.eql(\"36.00\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Synthetic demo \u2014 warm repeat",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/v1/fuel-routes/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"start\": {\n    \"latitude\": 36.154,\n    \"longitude\": -95.9928\n  },\n  \"finish\": {\n    \"latitude\": 39.1031,\n    \"longitude\": -84.512\n  }\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Synthetic demo returns a fuel plan\", () => {",
+              "  pm.response.to.have.status(200);",
+              "  const plan = pm.response.json();",
+              "  pm.expect(plan.catalog_mode).to.eql(\"synthetic\");",
+              "  pm.expect(plan.geometry.type).to.eql(\"LineString\");",
+              "  pm.expect(plan.fuel_stops[0].gallons_purchased).to.eql(12);",
+              "  pm.expect(plan.estimated_fuel_purchases_usd).to.eql(\"36.00\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invalid latitude",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/v1/fuel-routes/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"start\": {\n    \"latitude\": 99,\n    \"longitude\": -95.9928\n  },\n  \"finish\": {\n    \"latitude\": 39.1031,\n    \"longitude\": -84.512\n  }\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Invalid coordinates are rejected\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Authorized live route \u2014 Tulsa to Cincinnati",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/v1/fuel-routes/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"start\": {\n    \"latitude\": 36.154,\n    \"longitude\": -95.9928\n  },\n  \"finish\": {\n    \"latitude\": 39.1031,\n    \"longitude\": -84.512\n  }\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Configured catalog returns a plan\", () => {",
+              "  pm.response.to.have.status(200);",
+              "  pm.expect(pm.response.json().catalog_mode).to.eql(\"configured\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Authorized live address \u2014 Census and OSRM",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/v1/fuel-routes/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"start\": \"4600 Silver Hill Rd, Washington, DC 20233\",\n  \"finish\": {\n    \"latitude\": 38.9072,\n    \"longitude\": -77.0369\n  }\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Live start address returns a route\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
